@@ -1,9 +1,4 @@
-# Lecture\_14\_SQL\_Constraints\_and\_Alter\_Commands
-
-### Prepared by: Prof. Mahitha G
-
-*Department of Computer Science and Engineering*\
-Acknowledgments: Dr. Nagasundari S (Dept of CSE), Teaching Assistants
+# Lecture_14_SQL_Constraints_and_Alter_Commands
 
 ---
 
@@ -136,7 +131,7 @@ CREATE TABLE Employee (
 
 ---
 
-## Example: DEPT\_LOCATIONS
+## Example: DEPT_LOCATIONS
 
 ```sql
 CREATE TABLE Dept_Locations (
@@ -197,10 +192,12 @@ CHECK (Dept_create_date <= Mgr_start_date)
 Deletes an entire schema and all of its elements.
 
 - Syntax:
+
   ```
   DROP SCHEMA schema_name {CASCADE | RESTRICT};
 
   ```
+
 - **CASCADE** → Removes the schema and all objects inside it (tables, views, constraints, etc.).
 - **RESTRICT** → Removes the schema **only if it is empty**.
 
@@ -217,10 +214,12 @@ DROP SCHEMA Company CASCADE;
 
 1. Deletes a base relation (table) and its definition.
 2. Syntax:
+
    ```
    DROP TABLE table_name {CASCADE | RESTRICT};
 
    ```
+
 3. **CASCADE** → Drops the table even if other constraints or views depend on it (those dependent objects are also dropped).
 4. **RESTRICT** → Drops the table **only if nothing else depends on it**.
 
@@ -521,4 +520,3 @@ ALTER TABLE employee DROP COLUMN dept_ref_id;
 ---
 
 **End of Documentation Notes – Complete Extract of Slides**
-

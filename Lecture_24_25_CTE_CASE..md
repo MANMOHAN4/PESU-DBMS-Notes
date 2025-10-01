@@ -1,18 +1,11 @@
 # Lecture 24 & 25 – Common Table Expressions (Recursive) and CASE Statement
 
-### Prepared by: Prof. Mahitha G
-
-*Department of Computer Science and Engineering*  
-Acknowledgment: Teaching Assistants  
-Slides adapted from:
-- “Database System Concepts” – Silberschatz, Korth, Sudarshan (McGrawHill, 7th Ed., 2019)
-- “Fundamentals of Database Systems” – Elmasri, Navathe (Pearson, 7th Ed., 2017)
-
 ---
 
 # Common Table Expressions (CTE) – Recursive CTE
 
 ## Introduction
+
 - A **recursive CTE** references itself within the CTE.
 - Useful for working with **hierarchical data** (e.g., employee–supervisor relationships).
 - Continues executing until the query returns the entire hierarchy.
@@ -21,6 +14,7 @@ Slides adapted from:
 ---
 
 ## General Syntax
+
 ```sql
 WITH RECURSIVE cte_name (column_list) AS (
   -- Anchor member: base case
@@ -42,6 +36,7 @@ SELECT ... FROM cte_name;
 ---
 
 ## Explanation of Syntax Components
+
 - **cte_name**: Name of the CTE (can be referenced inside itself and final query).
 - **column_list**: Defines the result set columns.
 - **Anchor member**: Initial query, selects base rows. Must not reference the CTE.
@@ -52,6 +47,7 @@ SELECT ... FROM cte_name;
 ---
 
 ## Example 1 – Countdown from 5 to 1
+
 ```sql
 WITH RECURSIVE Countdown (n) AS (
   SELECT 5
@@ -68,6 +64,7 @@ SELECT n FROM Countdown;
 ---
 
 ## Example 2 – Count up from 1 to 5
+
 ```sql
 WITH RECURSIVE cte(n) AS (
   SELECT 1
@@ -84,6 +81,7 @@ SELECT * FROM cte;
 ---
 
 ## Execution Flow of Recursive CTE
+
 1. **Anchor member** executes → produces base row(s).
    - Example: `SELECT 1` → returns `1`.
 2. **Recursive member** executes with result of anchor.
@@ -93,7 +91,9 @@ SELECT * FROM cte;
 ---
 
 ## Example 3 – Organizational Hierarchy
+
 Extract the hierarchy of employees starting with CEO (no supervisor).
+
 ```sql
 WITH RECURSIVE orghierarchy AS (
   SELECT ssn, fname, lname, super_ssn, 1 AS level
@@ -116,6 +116,7 @@ SELECT * FROM orghierarchy;
 # CASE Statement in SQL
 
 ## Introduction
+
 - **CASE** is a conditional expression in SQL.
 - Enables conditional logic directly inside queries.
 - Returns specific results based on conditions.
@@ -124,6 +125,7 @@ SELECT * FROM orghierarchy;
 ---
 
 ## General Syntax
+
 ```sql
 CASE case_value
   WHEN condition THEN result1
@@ -136,7 +138,9 @@ END
 ---
 
 ## Example 1 – Salary Levels
+
 Categorize employees into High, Medium, Low.
+
 ```sql
 SELECT Fname, Salary,
   CASE
@@ -150,6 +154,7 @@ FROM employee;
 ---
 
 ## Example 2 – Bonus Status
+
 ```sql
 SELECT Fname, Salary,
   CASE
@@ -163,7 +168,9 @@ FROM employee;
 ---
 
 ## Example 3 – Workload Status
+
 Number of projects each employee works on.
+
 ```sql
 SELECT e.Fname, COUNT(w.Pno) AS Project_Count,
   CASE
@@ -179,7 +186,9 @@ GROUP BY e.Fname;
 ---
 
 ## Example 4 – Workload with CTE
+
 Combining CTE with CASE for readability.
+
 ```sql
 WITH Project_Counts AS (
   SELECT e.Fname, COUNT(w.Pno) AS Proj_Count
@@ -199,6 +208,7 @@ FROM Project_Counts;
 ---
 
 # Summary
+
 - Recursive CTEs handle hierarchical/iterative data.
 - `WITH RECURSIVE` defines anchor + recursive parts.
 - Execution repeats until termination condition.
@@ -209,4 +219,3 @@ FROM Project_Counts;
 ---
 
 **End of Lecture 24 & 25 Notes – Complete Extract of Slides**
-
