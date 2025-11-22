@@ -15,12 +15,14 @@ Relational database design is the grouping of attributes to form "good" relation
 ### Two Types of Design Methodology
 
 **Bottom-Up Design (Design by Synthesis)**
+
 - Considers basic relationships among individual attributes as starting point
 - Constructs relation schemas from these relationships
 - Not popular because it requires collecting all binary relationships among attributes
 - Impractical for real-life situations
 
 **Top-Down Design (Design by Analysis)**
+
 - Starts with natural groupings of attributes (from invoices, forms, reports)
 - Relations analyzed individually and collectively
 - Further decomposed until desirable properties met
@@ -58,16 +60,19 @@ Four informal measures of quality for relation schema design:
 ### Example Violations
 
 **EMP_DEPT relation**: Mixes attributes of employees and departments
+
 - Includes Dname, Dmgr_ssn (department attributes)
 - Violates Guideline 1
 
 **EMP_PROJ relation**: Mixes attributes of employees, projects, and WORKS_ON relationship
+
 - Includes Ename (employee), Pname, Plocation (project)
 - Violates Guideline 1
 
 ### Better Schema
 
 Separate into distinct relations:
+
 - EMPLOYEE (employee-only attributes)
 - DEPARTMENT (department-only attributes)
 - PROJECT (project-only attributes)
@@ -138,6 +143,7 @@ Decompose into separate relations to eliminate redundancy and anomalies.
 ### Handling NULL-Heavy Attributes
 
 If attribute is NULL frequently:
+
 - Do NOT include in main relation
 - Create separate relation with primary key
 
@@ -164,10 +170,12 @@ Joining on non-key/foreign-key attributes produces spurious tuples that are mean
 ### Example Violation
 
 Given:
+
 - EMP_PROJ1(Essn, Pnumber, Hours, Ename, Pname)
 - EMP_PROJ2(Pname, Plocation, Budget)
 
 If you perform natural join on common attribute Plocation:
+
 - Join condition NOT based on key-foreign key relationship
 - Plocation is NOT in primary key of EMP_PROJ1
 - Produces spurious tuples combining unrelated employee-project assignments
@@ -181,11 +189,11 @@ Join only on primary key-foreign key pairs to guarantee valid result tuples.
 
 ## Summary: Four Guidelines for Good Design
 
-| Guideline | Focus | Problem If Violated |
-|-----------|-------|-------------------|
-| 1 | Clear semantics | Ambiguous meaning, mixed entity attributes |
-| 2 | No redundancy | Update/insert/delete anomalies |
-| 3 | Minimize NULLs | Wasted space, data integrity issues |
-| 4 | Valid joins | Spurious tuples, incorrect results |
+| Guideline | Focus           | Problem If Violated                        | Solution                                    |
+| --------- | --------------- | ------------------------------------------ | ------------------------------------------- |
+| 1         | Clear semantics | Ambiguous meaning, mixed entity attributes | Better Schema - Separate distinct relations |
+| 2         | No redundancy   | Update/insert/delete anomalies             | Decompose into separate relations           |
+| 3         | Minimize NULLs  | Wasted space, data integrity issues        | Create separate relation                    |
+| 4         | Valid joins     | Spurious tuples, incorrect results         | Join only on primary key-foreign key pairs  |
 
 All four guidelines work together to achieve high-quality relational database design.
