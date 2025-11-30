@@ -108,13 +108,6 @@ A **transitive functional dependency** occurs when non-prime attribute depends o
 
 Formally: If X → Y and Y → Z, then X → Z is transitive dependency, provided X is a key and Z is non-prime.
 
-**Example**:
-- Ssn → Dept_Number (key to attribute)
-- Dept_Number → Dept_Name (non-key to non-key)
-- Therefore: Ssn → Dept_Name (transitive)
-
-Dept_Name is transitively dependent on Ssn through Dept_Number.
-
 ### Trivial Functional Dependency
 
 A **trivial functional dependency** holds by definition based on **Reflexive Rule**.
@@ -122,6 +115,7 @@ A **trivial functional dependency** holds by definition based on **Reflexive Rul
 If Y is subset of X, then dependency X → Y is always true (trivial).
 
 **Example**:
+
 - If X = {A, B, C} and Y = {B, C}
 - Then ABC → BC is trivial functional dependency
 - Because Y (BC) is subset of X (ABC)
@@ -134,15 +128,12 @@ X → Y is non-trivial if and only if **Y ⊈ X** (Y is not subset of X).
 
 Means Y contains at least one attribute not already in X.
 
-**Example**:
-- ABC → D is non-trivial (D not in ABC)
-- AB → ABC is trivial (ABC includes AB)
-
 ---
 
 ## Graphical Notation of FDs
 
 **Representation**:
+
 - Each FD displayed as horizontal line
 - Left-hand side attributes connected by vertical lines to FD line
 - Right-hand side attributes connected by lines with arrows pointing toward attributes
@@ -164,9 +155,11 @@ Not all FDs will hold. To determine if FD may exist:
 Given relation with Teacher, Course, Text columns:
 
 **May hold**:
+
 - Text → Course (each text used in one course)
 
 **Ruled out**:
+
 - Teacher → Course (multiple teachers teach same course)
 - Teacher → Text (one teacher uses multiple texts)
 - Course → Text (multiple texts in same course)
@@ -175,16 +168,16 @@ Given relation with Teacher, Course, Text columns:
 
 ## Summary: Functional Dependency Properties
 
-| Property | Meaning |
-|----------|---------|
-| X → Y | X determines Y; if X values same, Y must be same |
-| Full FD | Removing any attribute from X breaks dependency |
-| Partial FD | Can remove some attributes from X, still holds |
-| Transitive FD | Non-key → non-key through intermediate attribute |
-| Trivial FD | Y is subset of X; always holds |
-| Non-trivial FD | Y not subset of X; provides new information |
-| Prime attribute | Member of some candidate key |
-| Non-prime attribute | NOT member of any candidate key |
+| Property            | Meaning                                          |
+| ------------------- | ------------------------------------------------ |
+| X → Y               | X determines Y; if X values same, Y must be same |
+| Full FD             | Removing any attribute from X breaks dependency  |
+| Partial FD          | Can remove some attributes from X, still holds   |
+| Transitive FD       | Non-key → non-key through intermediate attribute |
+| Trivial FD          | Y is subset of X; always holds                   |
+| Non-trivial FD      | Y not subset of X; provides new information      |
+| Prime attribute     | Member of some candidate key                     |
+| Non-prime attribute | NOT member of any candidate key                  |
 
 ---
 
