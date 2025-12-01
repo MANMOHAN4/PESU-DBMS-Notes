@@ -1,4 +1,4 @@
-# Set Operations, Equivalent Queries, and Additional Relational Algebra
+# Set Operations, Equivalent Queries, Binary Algebra, and Aggregate Functions
 
 ## Set Operations Overview
 
@@ -50,6 +50,8 @@ R ∪ S produces relation containing all tuples in R or in S or in both.
 **Notation**:
 ```
 R ∪ S
+or
+r ∪ s
 ```
 
 **Properties**:
@@ -58,24 +60,51 @@ R ∪ S
 - **Duplicates eliminated**: Set semantics applied
 - Result size ≤ |R| + |S|
 
-**Example**:
+**Example 1: Courses in Different Semesters**:
 ```
 Query: Find all courses taught in Fall 2017 or Spring 2018 (or both)
 
-FALL_2017 ← ∏course_id (σ semester="Fall" ∧ year=2017 (section))
-SPRING_2018 ← ∏course_id (σ semester="Spring" ∧ year=2018 (section))
-RESULT ← FALL_2017 ∪ SPRING_2018
+∏_course_id (σ_semester="Fall" ∧ year=2017 (section)) 
+∪ 
+∏_course_id (σ_semester="Spring" ∧ year=2018 (section))
 
-Courses taught in either semester (duplicates removed)
+Output: All unique course IDs taught in either semester
+CS-101, CS-315, CS-190, CS-319, CS-347, FIN-201, HIS-351, MU-199, PHY-101
 ```
 
-**Real-World Example**:
+**Example 2: Union with Renaming**:
 ```
-Query: SSN of all employees who work in Dept 5 OR supervise someone in Dept 5
+Problem: Paternity vs Maternity relations with different attribute names
 
-DEPT5_EMPS ← ∏SSN (σ DNO=5 (EMPLOYEE))
-SUPERVISORS ← ∏SSN (EMPLOYEE ⋈ DEPT5_EMPS)
-RESULT ← DEPT5_EMPS ∪ SUPERVISORS
+Paternity (Father, Child)
+Maternity (Mother, Child)
+
+❌ WRONG: Paternity ∪ Maternity
+Problem: Father and Mother are different names
+
+✅ RIGHT:
+ρ_Parent→Parent (Paternity) ∪ ρ_Parent→Parent (Maternity)
+
+Result: Parent-Child pairs from both relations
+Parent | Child
+Adam  | Cain
+Adam  | Abel
+Abraham | Isaac
+Eve   | Cain
+Eve   | Seth
+Sarah | Isaac
+Hagar | Ishmael
+```
+
+**Example 3: Employee SSNs**:
+```
+Query: SSN of employees in Dept 5 OR supervising someone in Dept 5
+
+RESULT1 ← ∏_SSN (σ_DNO=5 (EMPLOYEE))
+RESULT2 ← ∏_SSN (EMPLOYEE ⋈_Mgr_ssn=SSN RESULT1)
+RESULT ← RESULT1 ∪ RESULT2
+
+Result: Union of direct employees and supervisors
 ```
 
 ---
@@ -91,6 +120,8 @@ R ∩ S produces relation containing tuples in BOTH R and S.
 **Notation**:
 ```
 R ∩ S
+or
+r ∩ s
 ```
 
 **Properties**:
@@ -98,24 +129,46 @@ R ∩ S
 - **Associative**: (R ∩ S) ∩ T = R ∩ (S ∩ T)
 - Result size ≤ min(|R|, |S|)
 
-**Example**:
+**Example 1: Courses in Both Semesters**:
 ```
-Query: Find courses taught in both Fall 2017 and Spring 2018
+Query: Find courses taught in BOTH Fall 2017 AND Spring 2018
 
-FALL_2017 ← ∏course_id (σ semester="Fall" ∧ year=2017 (section))
-SPRING_2018 ← ∏course_id (σ semester="Spring" ∧ year=2018 (section))
+FALL_2017 ← ∏_course_id (σ_semester="Fall" ∧ year=2017 (section))
+SPRING_2018 ← ∏_course_id (σ_semester="Spring" ∧ year=2018 (section))
 RESULT ← FALL_2017 ∩ SPRING_2018
 
-Courses offered both semesters
+Output: Courses offered in both semesters
 ```
 
-**Real-World Example**:
+**Example 2: Student-Instructor Overlap**:
 ```
-Query: Find people who are both Graduates and Managers
+Query: People who are both Students AND Instructors
 
-GRADUATES ∩ MANAGERS
+STUDENT | Fn      | Ln
+---------|---------|--------
+         | Susan   | Yao
+         | Ramesh  | Shah
+         | Johnny  | Kohler
+         | Barbara | Jones
+         | Amy     | Ford
+         | Jimmy   | Wang
+         | Ernest  | Gilbert
 
-Result: People in both relations
+INSTRUCTOR | Fname   | Lname
+------------|---------|--------
+           | John    | Smith
+           | Ricardo | Browne
+           | Susan   | Yao
+           | Francis | Johnson
+           | Ramesh  | Shah
+
+RESULT ← STUDENT ∩ INSTRUCTOR
+
+Output:
+Fn      | Ln
+--------|--------
+Susan   | Yao
+Ramesh  | Shah
 ```
 
 ---
@@ -131,6 +184,8 @@ R − S produces relation containing tuples in R that are NOT in S.
 **Notation**:
 ```
 R − S
+or
+r − s
 ```
 
 **Properties**:
@@ -139,24 +194,42 @@ R − S
 - S − R contains tuples only in S
 - Result size ≤ |R|
 
-**Example**:
+**Example 1: Exclusive Courses**:
 ```
-Query: Courses taught in Fall 2017 but not in Spring 2018
+Query: Courses taught in Fall 2017 but NOT in Spring 2018
 
-FALL_2017 ← ∏course_id (σ semester="Fall" ∧ year=2017 (section))
-SPRING_2018 ← ∏course_id (σ semester="Spring" ∧ year=2018 (section))
+FALL_2017 ← ∏_course_id (σ_semester="Fall" ∧ year=2017 (section))
+SPRING_2018 ← ∏_course_id (σ_semester="Spring" ∧ year=2018 (section))
 RESULT ← FALL_2017 − SPRING_2018
 
-Courses only in Fall 2017 (not offered in Spring 2018)
+Output: Courses only in Fall 2017 (not offered in Spring 2018)
 ```
 
-**Real-World Example**:
+**Example 2: Students Only (Not Instructors)**:
 ```
-Query: Students NOT enrolled in any course
+RESULT ← STUDENT − INSTRUCTOR
 
-ALL_STUDENTS ← ∏SID (STUDENT)
-ENROLLED_STUDENTS ← ∏SID (ENROLLED)
-RESULT ← ALL_STUDENTS − ENROLLED_STUDENTS
+Output: People who are students but NOT instructors
+Fn      | Ln
+--------|----------
+Johnny  | Kohler
+Barbara | Jones
+Amy     | Ford
+Jimmy   | Wang
+Ernest  | Gilbert
+```
+
+**Example 3: Non-Commutative Property**:
+```
+INSTRUCTOR − STUDENT:
+
+Fname   | Lname
+--------|--------
+John    | Smith
+Ricardo | Browne
+Francis | Johnson
+
+Clearly: (STUDENT − INSTRUCTOR) ≠ (INSTRUCTOR − STUDENT)
 ```
 
 ---
@@ -171,18 +244,18 @@ RESULT ← ALL_STUDENTS − ENROLLED_STUDENTS
 ```
 Union: R ∪ (S ∪ T) = (R ∪ S) ∪ T
 Intersection: R ∩ (S ∩ T) = (R ∩ S) ∩ T
-Difference: Not associative in general
+Difference: NOT associative in general
 ```
 
 ### Expressing Intersection Using Union and Difference
 ```
 R ∩ S = ((R ∪ S) − (R − S)) − (S − R)
 
-Why? 
-(R ∪ S) = all tuples in either
-(R − S) = tuples only in R
-(S − R) = tuples only in S
-Subtracting both gives tuples in both
+Why this works:
+(R ∪ S)         = all tuples in either relation
+(R − S)         = tuples only in R
+(S − R)         = tuples only in S
+Remove both     = leaves only tuples in both
 ```
 
 ---
@@ -200,22 +273,47 @@ Result T(Y) includes tuple t where for every tuple ts in S, there exists tuple t
 - tr[Y] = t
 - tr[X] = ts
 
+**Notation**:
+```
+R ÷ S
+or
+T ← R(Z) ÷ S(X)
+```
+
 **Example**:
 ```
-Query: Find employees who worked on ALL projects
+Query: Find SSNs of employees who worked on ALL projects
 
-WORKS_ON (SSN, Project_ID)
-ALL_PROJECTS (Project_ID)
+SSN_PNOS (Essn, Pno):
+Essn      | Pno
+-----------|------
+123456789  | 1
+123456789  | 2
+666884444  | 3
+453453453  | 1
+453453453  | 2
+333445555  | 2
+333445555  | 3
+333445555  | 10
+333445555  | 20
+... more rows
 
-Result ← WORKS_ON ÷ ALL_PROJECTS
+SMITH_PNOS (Pno):
+Pno
+----
+1
+2
 
-Result: SSNs of employees who worked on every project
+RESULT ← SSN_PNOS ÷ SMITH_PNOS
+
+Output:
+Ssn
+-----------
+123456789    (worked on projects 1 AND 2)
+453453453    (worked on projects 1 AND 2)
+
+These employees worked on BOTH projects that Smith worked on
 ```
-
-**Complexity**:
-- Division is the most complex set operation
-- Rarely used but important conceptually
-- Useful for "for all" queries
 
 ---
 
@@ -227,6 +325,8 @@ Combines every tuple from first relation with every tuple from second.
 **Notation**:
 ```
 R × S
+or
+r × s
 ```
 
 **Result**:
@@ -234,12 +334,13 @@ R × S
 - **Attributes**: All attributes from R and all from S (concatenated)
 - **Schema**: Q(A₁, A₂, ..., Aₙ, B₁, B₂, ..., Bₘ)
 
-**Example**:
+**Example - Size Calculation**:
 ```
 EMPLOYEE (8 tuples)
 DEPENDENT (4 tuples)
 
 EMPLOYEE × DEPENDENT = 8 × 4 = 32 tuples
+(Each employee paired with each dependent)
 ```
 
 **Important Caveat**:
@@ -271,6 +372,8 @@ Combines relations based on join condition (implicit Cartesian product + select)
 **Notation**:
 ```
 R ⋈_condition S
+or
+R ⋈ S
 ```
 
 **Advantage over Cartesian Product**:
@@ -284,18 +387,26 @@ R ⋈_condition S
 - Joins on all common attributes automatically
 - Removes duplicate columns
 
-**2. Equi-join**
-- Condition uses equality: R.ID = S.EmployeeID
+**2. Theta-join**
+- Condition uses any comparison: R.ID = S.EmployeeID
+- Can use =, ≠, >, ≥, <, ≤
 
-**3. Theta-join**
-- Condition uses any comparison: R.Salary > S.AvgSalary
+**3. Equi-join**
+- Condition uses equality operator
 
 **Example**:
 ```
 Query: Manager names and department names they manage
 
-MANAGER ⋈ DEPARTMENT
-(Natural join on common attributes)
+DEPT_MGR ← DEPARTMENT ⋈_Mgr_ssn=SSN EMPLOYEE
+RESULT ← ∏_Dname, Lname, Fname (DEPT_MGR)
+
+Output:
+Dname           | Lname   | Fname
+-----------------|---------|--------
+Research        | Wong    | Franklin
+Administration  | Wallace | Jennifer
+Headquarters    | Borg    | James
 ```
 
 ---
@@ -331,48 +442,347 @@ All three are equivalent (commutative property of SELECT)
 σ_p1 (σ_p2 (R)) = σ_(p1 ∧ p2) (R) = σ_p2 (σ_p1 (R))
 
 Best practice: Apply most restrictive condition first
-(Reduces intermediate results)
+(Reduces intermediate results quickly)
+
+Example:
+σ_dept="Physics" (σ_salary>90000 (INSTRUCTOR))
+
+More efficient than:
+σ_salary>90000 (σ_dept="Physics" (INSTRUCTOR))
+
+If dept "Physics" is small, first approach filters faster
 ```
 
 ---
 
-## Practical Query Examples
+## Aggregate Functions
 
-### Example 1: UNION
+### Overview
+
+**Definition**:
+Functions that take a collection of values as input and return a single value.
+
+**Five Aggregate Functions**:
+1. COUNT
+2. SUM
+3. AVERAGE (AVG)
+4. MAXIMUM (MAX)
+5. MINIMUM (MIN)
+
+**Purpose**:
+Express requests that cannot be written in basic relational algebra, such as:
+- Average or total salary of all employees
+- Total number of employee tuples
+- Maximum salary by department
+- Count of projects per employee
+
+### COUNT Function
+
+**Purpose**: Count number of tuples in a relation
+
+**Syntax**:
 ```
-Query: Students who are in CS major OR have GPA > 3.8
-
-CS_STUDENTS ← σ_major="CS" (STUDENT)
-HIGH_GPA ← σ_GPA>3.8 (STUDENT)
-RESULT ← CS_STUDENTS ∪ HIGH_GPA
+ℱ_COUNT (R)
+or
+COUNT(*) (R)
+or
+ℑ_COUNT SSN (EMPLOYEE)
 ```
 
-### Example 2: INTERSECTION
-```
-Query: Courses taught in both 2023 and 2024
+**Characteristics**:
+- Works on both numeric and non-numeric data types
+- Counts all rows including NULL values (when using *)
+- Can count specific attributes
 
-COURSES_2023 ← ∏course_id (σ_year=2023 (SECTION))
-COURSES_2024 ← ∏course_id (σ_year=2024 (SECTION))
-RESULT ← COURSES_2023 ∩ COURSES_2024
+**Example**:
+```
+Relation R:
+A | B
+--|--
+1 | 5
+2 | 6
+3 | 8
+4 | 10
+
+ℱ_COUNT (R) = 4
+
+Output: 4 (number of tuples)
 ```
 
-### Example 3: SET DIFFERENCE
-```
-Query: Employees in Marketing NOT in Management
+---
 
-MARKETING ← σ_dept="Marketing" (EMPLOYEE)
-MANAGEMENT ← σ_dept="Management" (EMPLOYEE)
-RESULT ← MARKETING − MANAGEMENT
+### SUM Function
+
+**Purpose**: Calculate sum of all selected numeric values
+
+**Syntax**:
+```
+ℱ_SUM Salary (EMPLOYEE)
+or
+SUM Salary (EMPLOYEE)
 ```
 
-### Example 4: Combining Operations
-```
-Query: Employees in (Dept5) OR supervising (Dept5) but NOT both
+**Characteristics**:
+- Works on numeric fields only
+- Ignores NULL values
+- Returns total of all values
 
-DEPT5 ← σ_DNO=5 (EMPLOYEE)
-SUPERVISORS ← ∏SSN (EMPLOYEE ⋈ DEPT5)
-IN_BOTH ← DEPT5 ∩ SUPERVISORS
-RESULT ← (DEPT5 ∪ SUPERVISORS) − IN_BOTH
+**Example**:
+```
+Query: Find total salary of all employees
+
+EMPLOYEE:
+Fname    | Salary
+---------|--------
+John     | 30000
+Franklin | 40000
+Alicia   | 25000
+Jennifer | 43000
+Ramesh   | 38000
+Joyce    | 25000
+Ahmad    | 25000
+James    | 55000
+
+ℱ_SUM Salary (EMPLOYEE) = 281000
+
+Output: 281000 (total of all salaries)
+```
+
+---
+
+### AVERAGE Function
+
+**Purpose**: Calculate average value of numeric data
+
+**Syntax**:
+```
+ℱ_AVG Salary (EMPLOYEE)
+or
+AVG Salary (EMPLOYEE)
+```
+
+**Characteristics**:
+- Works on numeric fields only
+- Returns average of all non-NULL values
+- Ignores NULL values
+
+**Example**:
+```
+Relation R:
+C
+---
+3
+5
+8
+10
+
+ℱ_AVG (C) (R) = (3+5+8+10) / 4 = 26 / 4 = 6.5
+
+Output: 6.5
+```
+
+---
+
+### MINIMUM Function
+
+**Purpose**: Find minimum value in a column
+
+**Syntax**:
+```
+ℱ_MIN Salary (EMPLOYEE)
+or
+MIN Salary (EMPLOYEE)
+```
+
+**Characteristics**:
+- Finds smallest value
+- Works on numeric and non-numeric data
+- Returns single value
+
+**Example**:
+```
+Relation R:
+C
+---
+3
+5
+8
+10
+
+ℱ_MIN (C) (R) = 3
+
+Output: 3 (smallest value)
+```
+
+---
+
+### MAXIMUM Function
+
+**Purpose**: Find maximum value in a column
+
+**Syntax**:
+```
+ℱ_MAX Salary (EMPLOYEE)
+or
+MAX Salary (EMPLOYEE)
+```
+
+**Characteristics**:
+- Finds largest value
+- Works on numeric and non-numeric data
+- Returns single value
+
+**Example**:
+```
+Relation R:
+C
+---
+3
+5
+8
+10
+
+ℱ_MAX (C) (R) = 10
+
+Output: 10 (largest value)
+```
+
+---
+
+## Aggregate Functions Without Grouping
+
+**Example: Company-Wide Statistics**:
+```
+Query: Find sum of salaries, maximum salary, minimum salary, and average salary
+
+ρ_R(Total_Sal, Highest_Sal, Lowest_Sal, Average_Sal) (
+  ℱ_SUM Salary, MAX Salary, MIN Salary, AVG Salary (EMPLOYEE)
+)
+
+Output:
+Total_Sal | Highest_Sal | Lowest_Sal | Average_Sal
+----------|-------------|------------|------------
+281000    | 55000       | 25000      | 35125
+```
+
+---
+
+## Grouping (GROUP BY)
+
+**Purpose**:
+Apply aggregate functions to subgroups of data instead of entire relation.
+
+**Concept**:
+- Divide data into non-overlapping groups based on specified attributes
+- Group consists of tuples with same value of grouping attribute(s)
+- Apply function independently to each group
+- Produces summary information per group
+
+**Syntax**:
+```
+GroupingAttr ℱ_Function1, Function2, ... (RELATION)
+```
+
+**Example Grouping by Department**:
+```
+Query: Find average salary for each department
+
+Dno ℱ_COUNT SSN, AVG Salary (EMPLOYEE)
+
+This groups employees by DNO (department number) and computes:
+- Count of employees per department
+- Average salary per department
+
+Output:
+Dno | COUNT(*) | AVG_Salary
+----|----------|------------
+1   | 1        | 55000
+4   | 3        | 36333.33
+5   | 4        | 33250
+```
+
+**Example 2: Multiple Grouping Attributes**:
+```
+Query: Retrieve each department number, number of employees, and average salary
+
+ρ_R(Dno, No_of_employees, Average_sal) (
+  Dno ℱ_COUNT SSN, AVG Salary (EMPLOYEE)
+)
+
+Output:
+Dno | No_of_employees | Average_sal
+----|-----------------|------------
+1   | 1               | 55000
+4   | 3               | 36333.33
+5   | 4               | 33250
+```
+
+---
+
+## Practical Aggregate Query Examples
+
+### Example 1: Total Numbers Only
+```
+Query: Find total employees and average salary across entire company
+
+ℱ_COUNT SSN, AVG Salary (EMPLOYEE)
+
+Output:
+COUNT | AVG_Salary
+------|----------
+8     | 35125
+```
+
+### Example 2: Per-Department Summary
+```
+Query: Show DNO, count of employees, and average salary per department
+
+Dno ℱ_COUNT SSN, AVG Salary (EMPLOYEE)
+
+Output:
+Dno | COUNT_SSN | AVG_Salary
+----|-----------|----------
+1   | 1         | 55000
+4   | 3         | 36333.33
+5   | 4         | 33250
+```
+
+### Example 3: Complex Aggregation
+```
+Query: For employees earning > $30,000, average salary by department
+
+Dno ℱ_COUNT SSN, AVG Salary (σ_Salary>30000 (EMPLOYEE))
+
+Output:
+Dno | COUNT | AVG_Salary
+----|-------|----------
+1   | 1     | 55000
+4   | 2     | 43000
+5   | 2     | 40000
+```
+
+---
+
+## Common Aggregate Patterns
+
+### Pattern 1: Overall Statistics
+```
+ℱ_SUM Salary, MAX Salary, MIN Salary, AVG Salary (RELATION)
+```
+
+### Pattern 2: Grouped Statistics
+```
+GroupAttr ℱ_COUNT(*), AVG Value (RELATION)
+```
+
+### Pattern 3: Filtered Then Aggregated
+```
+ℱ_COUNT SSN, AVG Salary (σ_condition (EMPLOYEE))
+```
+
+### Pattern 4: Multiple Grouping
+```
+Attr1, Attr2 ℱ_COUNT(*), SUM Value (RELATION)
 ```
 
 ---
@@ -386,5 +796,59 @@ RESULT ← (DEPT5 ∪ SUPERVISORS) − IN_BOTH
 5. **SET DIFFERENCE**: Tuples in first but not second (NOT commutative)
 6. **CARTESIAN PRODUCT**: All combinations (usually needs SELECT filter)
 7. **JOIN**: Cartesian product with condition built-in
-8. **Equivalent Queries**: Multiple valid expressions for same query
-9. **Optimization**: Different execution plans have different costs
+8. **DIVISION**: Finds values appearing with all combinations
+9. **Equivalent Queries**: Multiple valid expressions for same query
+10. **Aggregate Functions**: COUNT, SUM, AVG, MIN, MAX
+11. **GROUP BY**: Apply aggregates to data subgroups
+12. **Optimization**: Different execution plans have different costs
+
+---
+
+## Quick Reference: Operator Properties
+
+| Operator | Commutative | Associative | Union-Compatible Required |
+|----------|-------------|-------------|--------------------------|
+| UNION    | YES         | YES         | YES                       |
+| INTERSECT| YES         | YES         | YES                       |
+| MINUS    | NO          | NO          | YES                       |
+| CARTESIAN| NO          | NO          | NO                        |
+| JOIN     | YES*        | YES*        | NO                        |
+
+*Under certain conditions
+
+---
+
+## Practice Problem Solutions
+
+### Problem 1: Set Operations
+```
+Query: Employees in Sales OR Management (or both)
+
+SALES_EMPS ← σ_Dept="Sales" (EMPLOYEE)
+MGMT_EMPS ← σ_Dept="Management" (EMPLOYEE)
+RESULT ← SALES_EMPS ∪ MGMT_EMPS
+```
+
+### Problem 2: Filtering Intersection
+```
+Query: Courses offered in both semesters
+
+FALL ← ∏_CourseID (σ_Semester="Fall" (SECTION))
+SPRING ← ∏_CourseID (σ_Semester="Spring" (SECTION))
+RESULT ← FALL ∩ SPRING
+```
+
+### Problem 3: Aggregation
+```
+Query: Average salary per department
+
+Dno ℱ_AVG Salary (EMPLOYEE)
+```
+
+### Problem 4: Grouped and Filtered
+```
+Query: Average salary > 40000 by department
+
+Dno ℱ_AVG Salary (σ_Salary>40000 (EMPLOYEE))
+```
+
